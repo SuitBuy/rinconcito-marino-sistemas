@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rinconcito Marino</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/logo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v='20260608-cache-reset')}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top site-navbar home-navbar" id="siteNavbar">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+            <img th:src="@{/assets/logo.png}" alt="Rinconcito Marino">
+            <span class="fw-semibold">Rinconcito Marino</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" th:href="@{/}">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/carta}">Carta</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/reservas}">Reservas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<header class="hero" id="inicio">
+    <video autoplay muted loop playsinline poster="/assets/logo2.png" th:poster="@{/assets/logo2.png}">
+        <source th:src="@{/assets/main.mp4(v='20260608-video-reset')}" type="video/mp4">
+    </video>
+    <div class="hero-content container">
+        <div class="row align-items-center w-100">
+            <div class="col-lg-7 col-xl-6">
+                <img class="hero-logo mb-4" th:src="@{/assets/logo2.png}" alt="Logo Rinconcito Marino">
+                <h1 class="display-5 fw-bold">Sabor marino peruano</h1>
+                <p class="lead mb-4">Ingredientes naturales, sabor fresco y original.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/reservas}" class="btn btn-rm btn-lg">Reservar mesa</a>
+                    <a th:href="@{/carta}" class="btn btn-light btn-lg">Ver carta</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="#platos" class="scroll-cue" aria-label="Ver mas informacion">
+        <span class="scroll-mouse"><span></span></span>
+        <span>Desliza para ver mas</span>
+        <i class="fa-solid fa-chevron-down"></i>
+    </a>
+</header>
+
+<main>
+    <section class="section-pad bg-white" id="platos">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-lg-8">
+                    <h2 class="fw-bold">Platos destacados</h2>
+                    <p class="text-secondary mb-0">Ingredientes frescos, preparaciones honestas y el punto justo de tradicion costera.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4" th:each="plato : ${platos}">
+                    <article class="card h-100 shadow-sm border-0">
+                        <img class="card-img-top" th:src="@{${plato.imagen}}" th:alt="${plato.nombre}">
+                        <div class="card-body">
+                            <h3 class="h5 card-title" th:text="${plato.nombre}">Ceviche Clasico</h3>
+                            <p class="card-text text-secondary" th:text="${plato.descripcion}">Descripcion del plato</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-pad">
+        <div class="container">
+            <div class="row g-4 align-items-stretch">
+                <div class="col-lg-6">
+                    <div class="brand-panel h-100 p-4">
+                        <h2 class="fw-bold">Ubicanos</h2>
+                        <p class="text-secondary">Calle Tarata 248, Miraflores</p>
+                        <div class="ratio ratio-16x9 rounded overflow-hidden">
+                            <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.5653456391945!2d-77.02986422502755!3d-12.14371424726245!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x945f822f30200001%3A0xc3f17d848e025f38!2sCalle%20Tarata%20248%2C%20Miraflores%2015074!5e0!3m2!1ses-419!2spe!4v1700685600000!5m2!1ses-419!2spe"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="brand-panel h-100 p-4">
+                        <h2 class="fw-bold">Queremos tu opinion</h2>
+                        <form th:action="@{/opiniones}" th:object="${opinion}" method="post" class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label for="nombres" class="form-label">Nombres</label>
+                                <input th:field="*{nombres}" type="text" class="form-control" th:classappend="${#fields.hasErrors('nombres')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{nombres}">Error</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="correo" class="form-label">Correo</label>
+                                <input th:field="*{correo}" type="email" class="form-control" th:classappend="${#fields.hasErrors('correo')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{correo}">Error</div>
+                            </div>
+                            <div class="col-12">
+                                <label for="comentario" class="form-label">Comentario</label>
+                                <textarea th:field="*{comentario}" rows="5" class="form-control" th:classappend="${#fields.hasErrors('comentario')} ? ' is-invalid'"></textarea>
+                                <div class="invalid-feedback" th:errors="*{comentario}">Error</div>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-rm" type="submit">Enviar opinion</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="index-footer">
+    <div class="footer-main">
+        <div class="footer-col logo-col">
+            <img th:src="@{/assets/logo.png}" alt="Logo Rinconcito Marino" class="footer-logo">
+        </div>
+        <div class="footer-col">
+            <h3>Acerca de Rinconcito</h3>
+            <ul>
+                <li><a href="#inicio">Quienes somos</a></li>
+                <li><a th:href="@{/carta}">Nuestra carta</a></li>
+                <li><a href="https://www.google.com/maps/search/?api=1&query=Calle+Tarata+248+Miraflores" target="_blank" rel="noreferrer">Ubicanos</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h3>Mas informacion</h3>
+            <a href="#" class="libro-reclamaciones">
+                <i class="fas fa-book-open"></i> Libro de reclamaciones
+            </a>
+        </div>
+        <div class="footer-col actions-col">
+            <div class="social-icons">
+                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                <a href="#" aria-label="X"><i class="fab fa-x"></i></a>
+            </div>
+            <div class="footer-action-buttons">
+                <a th:href="@{/reservas}" class="footer-outline">Reservas</a>
+                <a th:href="@{/carta}" class="footer-outline">Carta</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="footer-copyright">
+            <p>Restaurante Rinconcito Marino 2026. Todos los derechos reservados</p>
+        </div>
+    </div>
+    <div class="floating-buttons">
+        <a href="#inicio" class="btn-float btn-scroll-top" id="scrollTopBtn" aria-label="Volver arriba">
+            <i class="fas fa-chevron-up"></i>
+        </a>
+    </div>
+</footer>
+
+<div class="modal fade" id="opinionOkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Opinion recibida</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">Gracias por ayudarnos a mejorar la experiencia de Rinconcito Marino.</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-rm" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="opinionErrorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Revisa tu opinion</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">Hay datos pendientes o con formato incorrecto.</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-rm" data-bs-dismiss="modal">Corregir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const opinionOk = /*[[${opinionOk ?: false}]]*/ false;
+    const opinionError = /*[[${opinionError ?: false}]]*/ false;
+    if (opinionOk) new bootstrap.Modal(document.getElementById('opinionOkModal')).show();
+    if (opinionError) new bootstrap.Modal(document.getElementById('opinionErrorModal')).show();
+
+    const siteNavbar = document.getElementById('siteNavbar');
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    const updateNavbar = () => {
+        siteNavbar.classList.toggle('navbar-scrolled', window.scrollY > 48);
+        scrollTopBtn.classList.toggle('show', window.scrollY > 300);
+    };
+    updateNavbar();
+    window.addEventListener('scroll', updateNavbar, { passive: true });
+    scrollTopBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+</script>
+</body>
+</html>

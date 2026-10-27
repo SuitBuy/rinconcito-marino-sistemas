@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservas - Rinconcito Marino</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/logo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v='20260608-cache-reset')}">
+</head>
+<body class="reservation-page">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top bg-dark bg-opacity-75 site-navbar">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+            <img th:src="@{/assets/logo.png}" alt="Rinconcito Marino">
+            <span class="fw-semibold">Rinconcito Marino</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Inicio</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/carta}">Carta</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/reservas}">Reservas</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="reservation-wizard">
+    <form th:action="@{/reservas}" th:object="${reserva}" method="post" id="reservationForm">
+        <input type="hidden" th:field="*{personas}">
+        <input type="hidden" th:field="*{fecha}">
+        <input type="hidden" th:field="*{hora}">
+
+        <div class="progress-container">
+            <div class="step-indicator active" id="ind1"><i class="fas fa-user"></i> Personas</div>
+            <div class="step-indicator" id="ind2"><i class="far fa-calendar-alt"></i> Fecha</div>
+            <div class="step-indicator" id="ind3"><i class="far fa-clock"></i> Hora</div>
+            <div class="step-indicator" id="ind4"><i class="fas fa-check-circle"></i> Datos</div>
+        </div>
+
+        <div class="wizard-content">
+            <section class="step-panel active" id="step1">
+                <h1 class="step-title">Elige la cantidad de personas</h1>
+                <div class="people-grid">
+                    <button type="button" class="btn-circle" onclick="selectPeople(1)">1</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(2)">2</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(3)">3</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(4)">4</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(5)">5</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(6)">6</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(7)">7</button>
+                    <button type="button" class="btn-circle" onclick="selectPeople(8)">8+</button>
+                </div>
+                <p class="text-danger small text-center mt-3" th:if="${#fields.hasErrors('personas')}" th:errors="*{personas}">Error</p>
+            </section>
+
+            <section class="step-panel" id="step2">
+                <button type="button" class="btn-back" onclick="goToStep(1)"><i class="fas fa-arrow-left"></i> Regresar</button>
+                <h1 class="step-title">Elige una fecha</h1>
+                <p class="step-subtitle">Recuerda: no atendemos reservas web los domingos.</p>
+                <div class="date-picker-container">
+                    <input type="date" id="dateInput" onchange="selectDate(this)">
+                </div>
+                <p id="dateError" class="error-msg"></p>
+                <p class="text-danger small text-center mt-3" th:if="${#fields.hasErrors('fecha')}" th:errors="*{fecha}">Error</p>
+            </section>
+
+            <section class="step-panel" id="step3">
+                <button type="button" class="btn-back" onclick="goToStep(2)"><i class="fas fa-arrow-left"></i> Regresar</button>
+                <h1 class="step-title">Elige una hora</h1>
+                <div class="time-grid">
+                    <button type="button" class="btn-time" onclick="selectTime('12:00 PM')">12:00 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('12:15 PM')">12:15 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('12:30 PM')">12:30 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('12:45 PM')">12:45 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('01:00 PM')">01:00 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('01:30 PM')">01:30 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('02:00 PM')">02:00 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('02:30 PM')">02:30 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('07:00 PM')">07:00 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('07:30 PM')">07:30 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('08:00 PM')">08:00 PM</button>
+                    <button type="button" class="btn-time" onclick="selectTime('08:30 PM')">08:30 PM</button>
+                </div>
+                <p class="text-danger small text-center mt-3" th:if="${#fields.hasErrors('hora')}" th:errors="*{hora}">Error</p>
+            </section>
+
+            <section class="step-panel" id="step4">
+                <button type="button" class="btn-back" onclick="goToStep(3)"><i class="fas fa-arrow-left"></i> Regresar</button>
+                <div class="final-layout">
+                    <div class="form-column">
+                        <h1 class="step-title text-start">Completa tus datos</h1>
+                        <div class="form-row">
+                            <div class="reservation-input-group">
+                                <label for="nombres">Nombres</label>
+                                <input type="text" th:field="*{nombres}" placeholder="Tu nombre" th:classappend="${#fields.hasErrors('nombres')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{nombres}">Error</div>
+                            </div>
+                            <div class="reservation-input-group">
+                                <label for="apellidos">Apellidos</label>
+                                <input type="text" th:field="*{apellidos}" placeholder="Tu apellido" th:classappend="${#fields.hasErrors('apellidos')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{apellidos}">Error</div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="reservation-input-group">
+                                <label for="dni">DNI</label>
+                                <input type="text" th:field="*{dni}" placeholder="8 digitos" maxlength="8" th:classappend="${#fields.hasErrors('dni')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{dni}">Error</div>
+                            </div>
+                            <div class="reservation-input-group">
+                                <label for="edad">Edad</label>
+                                <input type="number" th:field="*{edad}" placeholder="Ej. 25" min="18" th:classappend="${#fields.hasErrors('edad')} ? ' is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{edad}">Error</div>
+                            </div>
+                        </div>
+                        <div class="reservation-input-group">
+                            <label for="email">Correo Electronico</label>
+                            <input type="email" th:field="*{email}" placeholder="correo@ejemplo.com" th:classappend="${#fields.hasErrors('email')} ? ' is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{email}">Error</div>
+                        </div>
+                        <div class="reservation-input-group">
+                            <label for="telefono">Numero de Telefono (WhatsApp)</label>
+                            <input type="text" th:field="*{telefono}" placeholder="999 999 999" maxlength="9" th:classappend="${#fields.hasErrors('telefono')} ? ' is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{telefono}">Error</div>
+                            <p class="reservation-help"><i class="fab fa-whatsapp"></i> Te escribiremos a este numero para coordinar el pago.</p>
+                        </div>
+                    </div>
+
+                    <aside class="summary-column">
+                        <div class="reservation-summary-card">
+                            <h2>Rinconcito Marino</h2>
+                            <p class="location-text">Miraflores</p>
+                            <div class="summary-detail"><i class="fas fa-map-marker-alt"></i> Calle Tarata 248</div>
+                            <hr class="divider">
+                            <div class="summary-row"><i class="fas fa-user-friends"></i> <span id="sumPersonas">--</span></div>
+                            <div class="summary-row"><i class="far fa-calendar-alt"></i> <span id="sumFecha">--/--/----</span></div>
+                            <div class="summary-row"><i class="far fa-clock"></i> <span id="sumHora">--:--</span></div>
+                            <hr class="divider">
+                            <div class="summary-row reservation-cost">
+                                <span>Costo Reserva:</span>
+                                <span>S/ 20.00</span>
+                            </div>
+                            <p class="reservation-note">*El pago se coordinara por WhatsApp</p>
+                            <button type="button" class="btn-confirm" onclick="submitReservation()">SOLICITAR RESERVA</button>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </div>
+    </form>
+</main>
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Solicitud enviada</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                Tu reserva quedo en estado Pendiente. Puedes abrir WhatsApp para coordinar el adelanto de S/ 20.00.
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-success" th:if="${whatsappUrl}" th:href="${whatsappUrl}" target="_blank" rel="noreferrer">
+                    <i class="fab fa-whatsapp"></i> Abrir WhatsApp
+                </a>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="validationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5">Datos incompletos</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">Corrige los campos marcados antes de solicitar la reserva.</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-rm" data-bs-dismiss="modal">Revisar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const validationError = /*[[${validationError ?: false}]]*/ false;
+    const reservaOk = /*[[${reservaOk ?: false}]]*/ false;
+    const reserva = {
+        personas: document.getElementById('personas').value || '',
+        fecha: document.getElementById('fecha').value || '',
+        hora: document.getElementById('hora').value || ''
+    };
+
+    function goToStep(stepNumber) {
+        document.querySelectorAll('.step-panel').forEach(panel => panel.classList.remove('active'));
+        document.getElementById('step' + stepNumber).classList.add('active');
+        updateIndicators(stepNumber);
+    }
+
+    function updateIndicators(currentStep) {
+        for (let i = 1; i <= 4; i++) {
+            const indicator = document.getElementById('ind' + i);
+            if (i <= currentStep) indicator.classList.add('active');
+            else indicator.classList.remove('active');
+        }
+    }
+
+    function selectPeople(personas) {
+        reserva.personas = personas;
+        document.getElementById('personas').value = personas;
+        document.getElementById('sumPersonas').textContent = personas + (personas === 1 ? ' persona' : ' personas');
+        const dateInput = document.getElementById('dateInput');
+        dateInput.min = new Date().toISOString().split('T')[0];
+        goToStep(2);
+    }
+
+    function selectDate(input) {
+        if (!input.value) return;
+        const parts = input.value.split('-');
+        const date = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (date.getDay() === 0) {
+            document.getElementById('dateError').textContent = 'No atendemos los domingos.';
+            input.value = '';
+            return;
+        }
+        document.getElementById('dateError').textContent = '';
+        reserva.fecha = input.value;
+        document.getElementById('fecha').value = input.value;
+        document.getElementById('sumFecha').textContent = date.toLocaleDateString('es-PE', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        goToStep(3);
+    }
+
+    function selectTime(hora) {
+        reserva.hora = hora;
+        document.getElementById('hora').value = hora;
+        document.getElementById('sumHora').textContent = hora;
+        goToStep(4);
+    }
+
+    function submitReservation() {
+        const requiredIds = ['personas', 'fecha', 'hora', 'nombres', 'apellidos', 'dni', 'edad', 'email', 'telefono'];
+        const hasEmpty = requiredIds.some(id => !document.getElementById(id).value.trim());
+        if (hasEmpty) {
+            new bootstrap.Modal(document.getElementById('validationModal')).show();
+            return;
+        }
+
+        const dni = document.getElementById('dni').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const edad = Number(document.getElementById('edad').value);
+        if (dni.length !== 8 || telefono.length !== 9 || edad < 18) {
+            new bootstrap.Modal(document.getElementById('validationModal')).show();
+            return;
+        }
+
+        const button = document.querySelector('.btn-confirm');
+        button.textContent = 'PROCESANDO...';
+        button.disabled = true;
+        document.getElementById('reservationForm').submit();
+    }
+
+    if (reserva.personas) document.getElementById('sumPersonas').textContent = reserva.personas + ' persona(s)';
+    if (reserva.fecha) document.getElementById('sumFecha').textContent = reserva.fecha;
+    if (reserva.hora) document.getElementById('sumHora').textContent = reserva.hora;
+    if (validationError) {
+        goToStep(4);
+        new bootstrap.Modal(document.getElementById('validationModal')).show();
+    }
+    if (reservaOk) new bootstrap.Modal(document.getElementById('successModal')).show();
+</script>
+</body>
+</html>

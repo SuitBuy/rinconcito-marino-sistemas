@@ -1,0 +1,326 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Rinconcito Marino</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/logo.png}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v='20261027-admin-compact')}">
+</head>
+<body class="admin-layout">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/admin}">
+            <img th:src="@{/assets/logo.png}" alt="Rinconcito Marino">
+            <span class="fw-semibold">Panel Rinconcito Marino</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${view == 'dashboard'} ? ' active'" th:href="@{/admin}">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${view == 'reservas'} ? ' active'" th:href="@{/admin/reservas}">
+                        <i class="fa-regular fa-calendar-check"></i> Reservas
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${view == 'opiniones'} ? ' active'" th:href="@{/admin/opiniones}">
+                        <i class="fa-regular fa-comments"></i> Opiniones
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:classappend="${view == 'usuarios'} ? ' active'" th:href="@{/admin/usuarios}">
+                        <i class="fa-solid fa-users-gear"></i> Usuarios
+                    </a>
+                </li>
+                <li class="nav-item text-white-50 px-lg-2">
+                    <span sec:authentication="name">admin</span>
+                </li>
+                <li class="nav-item">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-outline-light btn-sm">
+                            <i class="fa-solid fa-right-from-bracket"></i> Salir
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="container-fluid px-4 py-4">
+    <div class="alert alert-success" th:if="${reservaMensaje}" th:text="${reservaMensaje}" role="status"></div>
+    <section th:if="${view == 'dashboard'}" class="admin-dashboard">
+        <header class="admin-page-header">
+            <div><h1 class="h4 fw-bold mb-0">Agenda y atencion</h1></div>
+            <a class="btn btn-rm" th:href="@{/admin/reservas/nueva}" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')">+ Nueva reserva</a>
+        </header>
+        <form method="get" th:action="@{/admin}" class="admin-agenda-toolbar">
+            <label for="diaAgenda" class="small fw-semibold">Fecha de la agenda</label>
+            <input id="diaAgenda" class="form-control" type="date" name="dia" th:value="${dia}">
+            <button class="btn btn-rm">Consultar</button><a class="btn btn-outline-rm" th:href="@{/admin}">Hoy</a>
+            <a class="ms-md-auto small" th:href="@{/admin/reservas}">Buscar todas las reservas</a>
+        </form>
+        <div class="row g-3 mb-4">
+<div class="col-6 col-xl-3"><article class="dashboard-kpi warning"><span>Pendientes</span><strong th:text="${pendientesDia}">0</strong></article></div>
+<div class="col-6 col-xl-3"><article class="dashboard-kpi success"><span>Confirmadas</span><strong th:text="${confirmadasDia}">0</strong></article></div>
+<div class="col-6 col-xl-3"><article class="dashboard-kpi primary"><span>Personas confirmadas</span><strong th:text="${personasDia}">0</strong></article></div>
+<div class="col-6 col-xl-3"><article class="dashboard-kpi accent"><span>Atendidas</span><strong th:text="${atendidasDia}">0</strong></article></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-xl-8"><section class="card border-0 shadow-sm"><div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h6 fw-bold mb-0">Agenda del dia</h2><span class="text-secondary small" th:text="${#temporals.format(dia,'dd/MM/yyyy')}"></span></div>
+                <div class="dashboard-list">
+                    <article th:each="reserva : ${reservasHoy}" class="dashboard-list-item">
+                        <div class="agenda-client"><strong th:text="${reserva.hora}"></strong><span th:text="${reserva.nombreCompleto}"></span><small th:text="${reserva.personas + ' personas'}"></small></div>
+                        <div class="agenda-actions"><span class="badge" th:classappend="' text-bg-' + ${reserva.estado.badgeClass}" th:text="${reserva.estado.etiqueta}"></span>
+                            <a class="btn btn-outline-rm btn-sm" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')" th:href="@{/admin/reservas/{id}/editar(id=${reserva.id})}">Editar</a>
+                            <form th:if="${reserva.estado.name() == 'CONFIRMADO'}" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post"><input type="hidden" name="estado" value="ATENDIDO"><button class="btn btn-outline-success btn-sm">Atendida</button></form>
+                        </div>
+                    </article>
+                    <p th:if="${#lists.isEmpty(reservasHoy)}" class="dashboard-empty mb-0">No hay reservas para esta fecha.</p>
+                </div>
+            </div></section></div>
+            <div class="col-xl-4"><section class="card border-0 shadow-sm"><div class="card-body">
+                <h2 class="h6 fw-bold mb-3">Por confirmar</h2>
+                <article th:each="reserva : ${reservasUrgentes}" class="dashboard-list-item mb-2">
+                    <div><strong th:text="${reserva.nombreCompleto}"></strong><small th:text="${reserva.hora + ' · ' + reserva.personas + ' personas'}"></small></div>
+                    <form sec:authorize="hasAnyRole('ADMIN','EMPLEADO')" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post"><input type="hidden" name="estado" value="CONFIRMADO"><button class="btn btn-outline-success btn-sm">Confirmar</button></form>
+                </article>
+                <p th:if="${#lists.isEmpty(reservasUrgentes)}" class="dashboard-empty mb-0">Sin pendientes para esta fecha.</p>
+            </div></section>
+            <section class="card border-0 shadow-sm mt-3"><div class="card-body"><h2 class="h6 fw-bold">Resumen del mes</h2><p class="small text-secondary mb-2"><strong th:text="${stats.reservasMes}"></strong> reservas registradas para este mes.</p><a class="small" th:href="@{/admin/reservas}">Consultar y exportar reportes</a></div></section></div>
+            <div class="col-md-6"><section class="card border-0 shadow-sm"><div class="card-body"><div class="d-flex justify-content-between mb-3"><h2 class="h6 fw-bold mb-0">Opiniones recientes</h2><a class="small" th:href="@{/admin/opiniones}">Ver todas</a></div><div th:each="opinion : ${opinionesRecientes}" class="mb-3 small"><strong th:text="${opinion.nombres}"></strong><p class="text-secondary mb-0" th:text="${opinion.comentario}"></p></div><p th:if="${#lists.isEmpty(opinionesRecientes)}" class="text-secondary small">Sin opiniones.</p></div></section></div>
+            <div class="col-md-6"><section class="card border-0 shadow-sm"><div class="card-body"><h2 class="h6 fw-bold mb-3">Ultimos movimientos</h2><div th:each="item : ${historialReciente}" class="mb-3 small"><strong th:text="${item.accion}"></strong><p class="text-secondary mb-0"><span th:text="${item.usuario}"></span> · <span th:text="${#temporals.format(item.fecha,'dd/MM HH:mm')}"></span></p></div><p th:if="${#lists.isEmpty(historialReciente)}" class="small text-secondary">Sin movimientos.</p></div></section></div>
+        </div>
+    </section>
+
+    <section class="card border-0 shadow-sm" th:if="${!#strings.equals(view, 'dashboard')}">
+        <div class="card-body">
+            <div class="row g-3 align-items-center mb-3">
+                <div class="col-md-6">
+                    <h1 class="h4 fw-bold mb-0" th:text="${view == 'opiniones'} ? 'Gestion de opiniones' : (${view == 'usuarios'} ? 'Gestion de usuarios' : 'Gestion de reservas')">Gestion</h1>
+                </div>
+                <div class="col-md-6" th:if="${view == 'opiniones'}">
+                    <form class="d-flex gap-2" method="get" th:action="@{/admin/opiniones}">
+                        <input type="search" class="form-control" name="q" th:value="${q}" placeholder="Buscar...">
+                        <button class="btn btn-rm" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <a th:if="${view == 'reservas'}" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')" class="btn btn-rm mb-3" th:href="@{/admin/reservas/nueva}">+ Nueva reserva</a>
+            <form th:if="${view == 'reservas'}" class="reservation-admin-filters" method="get" th:action="@{/admin/reservas}">
+                <input type="search" class="form-control" name="q" th:value="${q}" placeholder="Buscar cliente, DNI, telefono o correo">
+                <select class="form-select" name="estado">
+                    <option value="">Todos los estados</option>
+                    <option th:each="estado : ${estados}" th:value="${estado}" th:text="${estado.etiqueta}" th:selected="${estadoFiltro == estado}">Estado</option>
+                </select>
+                <input class="form-control" type="date" name="fechaDesde" th:value="${fechaDesde}" title="Desde">
+                <input class="form-control" type="date" name="fechaHasta" th:value="${fechaHasta}" title="Hasta">
+                <input class="form-control" type="number" min="1" max="20" name="personas" th:value="${personasFiltro}" placeholder="Personas">
+                <input class="form-control" type="text" name="hora" th:value="${horaFiltro}" placeholder="Hora">
+                <div class="admin-filter-actions">
+                <button class="btn btn-rm" type="submit"><i class="fa-solid fa-filter"></i> Filtrar</button>
+                <a class="btn btn-outline-rm"
+                   th:href="@{/admin/reservas/exportar(q=${q},estado=${estadoFiltro},fechaDesde=${fechaDesde},fechaHasta=${fechaHasta},personas=${personasFiltro},hora=${horaFiltro})}">
+                    <i class="fa-solid fa-file-csv"></i> CSV
+                </a>
+                <a class="btn btn-outline-success" th:href="@{/admin/reservas/excel(q=${q},estado=${estadoFiltro},fechaDesde=${fechaDesde},fechaHasta=${fechaHasta},personas=${personasFiltro},hora=${horaFiltro})}">Excel</a>
+                <a class="btn btn-outline-secondary" th:href="@{/admin/reservas}">Limpiar</a>
+                </div>
+            </form>
+
+            <div th:if="${view == 'reservas'}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Contacto</th>
+                        <th>Reserva</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="reserva : ${reservas}">
+                        <td>
+                            <div class="fw-semibold" th:text="${reserva.nombreCompleto}">Cliente</div>
+                            <div class="small text-secondary">DNI <span th:text="${reserva.dni}">00000000</span> - <span th:text="${reserva.edad}">18</span> anos</div>
+                        </td>
+                        <td>
+                            <div th:text="${reserva.telefono}">999999999</div>
+                            <div class="small text-secondary" th:text="${reserva.email}">correo@demo.com</div>
+                        </td>
+                        <td>
+                            <div><span th:text="${reserva.personas}">2</span> persona(s)</div>
+                            <div class="small text-secondary">
+                                <span th:text="${#temporals.format(reserva.fecha, 'dd/MM/yyyy')}">01/01/2026</span>
+                                - <span th:text="${reserva.hora}">12:00 PM</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="' text-bg-' + ${reserva.estado.badgeClass}" th:text="${reserva.estado.etiqueta}">Pendiente</span>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                <a class="btn btn-outline-rm btn-sm" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')" th:href="@{/admin/reservas/{id}/editar(id=${reserva.id})}">Editar</a>
+                                <a class="btn btn-success btn-sm"
+                                   th:if="${reserva.whatsappClienteUrl}"
+                                   target="_blank"
+                                   rel="noreferrer"
+                                   th:href="${reserva.whatsappClienteUrl}">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                                <form th:if="${reserva.estado.name() == 'PENDIENTE'}" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="estado" value="CONFIRMADO">
+                                    <button class="btn btn-outline-success btn-sm" type="submit">Confirmar</button>
+                                </form>
+                                <form th:if="${reserva.estado.name() == 'CONFIRMADO'}" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="estado" value="ATENDIDO">
+                                    <button class="btn btn-outline-primary btn-sm" type="submit">Atendido</button>
+                                </form>
+                                <details class="admin-more" sec:authorize="hasAnyRole('ADMIN','EMPLEADO')"><summary class="btn btn-outline-secondary btn-sm">Mas acciones</summary><div class="d-flex flex-wrap gap-2 pt-2">
+                                <form th:if="${reserva.estado.name() == 'CONFIRMADO'}" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="estado" value="NO_ASISTIO">
+                                    <button class="btn btn-outline-dark btn-sm" type="submit">No asistio</button>
+                                </form>
+                                <form th:if="${reserva.estado.name() == 'PENDIENTE'}" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="estado" value="CANCELADO_CLIENTE">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit">Cancelar</button>
+                                </form>
+                                <form th:if="${reserva.estado.name() == 'PENDIENTE'}" th:action="@{/admin/reservas/{id}/estado(id=${reserva.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="estado" value="RECHAZADO">
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">Rechazar</button>
+                                </form>
+                                <form th:action="@{/admin/reservas/{id}/eliminar(id=${reserva.id})}" method="post" onsubmit="return confirm('Eliminar esta reserva?')" sec:authorize="hasRole('ADMIN')">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit" aria-label="Eliminar reserva"><i class="fa-regular fa-trash-can"></i></button>
+                                </form>
+                                </div></details>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(reservas)}">
+                        <td colspan="5" class="text-center text-secondary py-5">No hay reservas para mostrar.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${view == 'opiniones'}" class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Correo</th>
+                        <th>Comentario</th>
+                        <th>Moderacion</th>
+                        <th>Fecha</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="opinion : ${opiniones}">
+                        <td th:text="${opinion.nombres}">Nombre</td>
+                        <td th:text="${opinion.correo}">correo@demo.com</td>
+                        <td th:text="${opinion.comentario}">Comentario</td>
+                        <td>
+                            <span class="badge text-bg-success" th:if="${opinion.visible}">Visible</span>
+                            <span class="badge text-bg-secondary" th:unless="${opinion.visible}">Oculto</span>
+                            <span class="badge text-bg-warning" th:if="${opinion.destacado}">Destacado</span>
+                        </td>
+                        <td th:text="${#temporals.format(opinion.fechaRegistro, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                        <td class="text-end">
+                            <div class="d-flex flex-wrap justify-content-end gap-2">
+                                <form th:action="@{/admin/opiniones/{id}/moderacion(id=${opinion.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="visible" th:value="${!opinion.visible}">
+                                    <input type="hidden" name="destacado" th:value="${opinion.destacado}">
+                                    <button class="btn btn-outline-rm btn-sm" type="submit" th:text="${opinion.visible} ? 'Ocultar' : 'Mostrar'">Ocultar</button>
+                                </form>
+                                <form th:action="@{/admin/opiniones/{id}/moderacion(id=${opinion.id})}" method="post" sec:authorize="!hasRole('LECTOR')">
+                                    <input type="hidden" name="visible" th:value="${opinion.visible}">
+                                    <input type="hidden" name="destacado" th:value="${!opinion.destacado}">
+                                    <button class="btn btn-outline-warning btn-sm" type="submit" th:text="${opinion.destacado} ? 'Quitar destacado' : 'Destacar'">Destacar</button>
+                                </form>
+                                <form th:action="@{/admin/opiniones/{id}/eliminar(id=${opinion.id})}" method="post" onsubmit="return confirm('Eliminar esta opinion?')" sec:authorize="hasRole('ADMIN')">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="fa-regular fa-trash-can"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(opiniones)}">
+                        <td colspan="6" class="text-center text-secondary py-5">No hay opiniones para mostrar.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div th:if="${view == 'usuarios'}">
+                <div class="alert alert-success" th:if="${userOk}" th:text="${userOk}">Usuario creado.</div>
+                <div class="alert alert-danger" th:if="${userError}" th:text="${userError}">Error.</div>
+
+                <form class="row g-3 align-items-end mb-4" method="post" th:action="@{/admin/usuarios}">
+                    <div class="col-md-4">
+                        <label class="form-label">Usuario</label>
+                        <input class="form-control" name="usuario" minlength="3" maxlength="40" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Contrasena</label>
+                        <input class="form-control" name="password" type="password" minlength="8" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Rol</label>
+                        <select class="form-select" name="rol" required>
+                            <option th:each="rol : ${roles}" th:value="${rol}" th:text="${rol.etiqueta}">Rol</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-rm" type="submit">Crear</button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="usuario : ${usuarios}">
+                            <td>
+                                <span class="fw-semibold" th:text="${usuario.usuario}">admin</span>
+                                <span class="badge text-bg-primary ms-2" th:if="${usuario.usuario == currentUser}">Tu cuenta</span>
+                            </td>
+                            <td th:text="${usuario.rol.etiqueta}">Administrador</td>
+                            <td class="text-end">
+                                <form th:if="${usuario.usuario != currentUser}" th:action="@{/admin/usuarios/{id}/eliminar(id=${usuario.id})}" method="post" onsubmit="return confirm('Eliminar este usuario?')">
+                                    <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="fa-regular fa-trash-can"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(usuarios)}">
+                            <td colspan="3" class="text-center text-secondary py-5">No hay usuarios para mostrar.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

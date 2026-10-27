@@ -1,0 +1,9 @@
+target/
+data/
+.env
+.local-runtime.ps1
+.local-db.properties
+.mvn/wrapper/maven-wrapper.jar
+*.log
+debug_log.txt
+.local-server.pid

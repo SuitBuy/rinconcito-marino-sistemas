@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Gestionar reserva</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"></head>
+<body class="bg-light"><main class="container py-4" style="max-width:900px">
+<a th:href="@{/admin/reservas}" class="btn btn-outline-secondary mb-3">Volver a reservas</a>
+<section class="card shadow-sm"><div class="card-body p-4">
+<h1 class="h3" th:text="${reserva.id == null ? 'Nueva reserva' : 'Editar y reprogramar reserva'}">Reserva</h1>
+<p class="text-secondary">Registra los datos del cliente y la fecha de visita. Al editar se conserva el estado actual.</p>
+<form th:action="@{/admin/reservas/guardar}" th:object="${reserva}" method="post" class="row g-3">
+<input type="hidden" name="reservaId" th:value="*{id}">
+<div class="col-md-6"><label class="form-label" for="nombres">Nombres</label><input class="form-control" id="nombres" type="text" th:field="*{nombres}" required><div class="text-danger small" th:errors="*{nombres}"></div></div>
+<div class="col-md-6"><label class="form-label" for="apellidos">Apellidos</label><input class="form-control" id="apellidos" type="text" th:field="*{apellidos}" required><div class="text-danger small" th:errors="*{apellidos}"></div></div>
+<div class="col-md-6"><label class="form-label" for="dni">DNI</label><input class="form-control" id="dni" type="text" th:field="*{dni}" required><div class="text-danger small" th:errors="*{dni}"></div></div>
+<div class="col-md-6"><label class="form-label" for="edad">Edad</label><input class="form-control" id="edad" type="number" th:field="*{edad}" required><div class="text-danger small" th:errors="*{edad}"></div></div>
+<div class="col-md-6"><label class="form-label" for="email">Correo</label><input class="form-control" id="email" type="email" th:field="*{email}" required><div class="text-danger small" th:errors="*{email}"></div></div>
+<div class="col-md-6"><label class="form-label" for="telefono">Telefono</label><input class="form-control" id="telefono" type="tel" th:field="*{telefono}" required><div class="text-danger small" th:errors="*{telefono}"></div></div>
+<div class="col-md-6"><label class="form-label" for="personas">Personas</label><input class="form-control" id="personas" type="number" th:field="*{personas}" required><div class="text-danger small" th:errors="*{personas}"></div></div>
+<div class="col-md-6"><label class="form-label" for="fecha">Fecha</label><input class="form-control" id="fecha" type="date" th:field="*{fecha}" required><div class="text-danger small" th:errors="*{fecha}"></div></div>
+<div class="col-md-6"><label class="form-label" for="hora">Hora (ejemplo: 13:00)</label><input class="form-control" id="hora" type="text" th:field="*{hora}" required><div class="text-danger small" th:errors="*{hora}"></div></div>
+<div class="col-12"><button class="btn btn-primary" type="submit">Guardar reserva</button></div>
+</form></div></section></main></body></html>
